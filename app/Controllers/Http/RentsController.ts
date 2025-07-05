@@ -129,7 +129,7 @@ export default class RentsController {
     public async getAllPost({ request }: HttpContextContract) {
         const payload = request.all()
         const userId = request.header('userId') || ''
-        const categoryId = payload.categoryId || ''
+        // const categoryId = payload.categoryId || ''
 
         let orderbyColumn: string = payload.orderbyColumn ? String(payload.orderbyColumn) : 'id'
         let orderbyValue: string = payload.orderbyValue ? String(payload.orderbyValue) : 'DESC'
@@ -151,10 +151,13 @@ export default class RentsController {
             })
         }
 
-        let rentPostCount = await RentRepo.getRentCount(payload.type, subscriptionIds, categoryId)
         let rentPost = RentDomain.createFromArrOfObject(
             await RentRepo.getAllPost(userId, orderbyColumn, orderbyValue, payload, offset, limit, subscriptionIds)
         )
+        let rentPostWithoutPagination = RentDomain.createFromArrOfObject(
+            await RentRepo.getAllPost(userId, orderbyColumn, orderbyValue, payload, undefined, undefined, subscriptionIds)
+        )
+        let rentPostCount = rentPostWithoutPagination.length
 
         // if (rentPost.length != 0) {
         //     rentPost.map(async (el) => {

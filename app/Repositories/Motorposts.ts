@@ -39,21 +39,21 @@ export default class MotorpostRepo {
         return result[0]
     }
 
-        static async getMotorCount(subscriptionIds, mainMotorCategoryId) {
+    static async getMotorCount(subscriptionIds, mainMotorCategoryId) {
         // var datetime: any = new Date();
         // var startTime: any = format(datetime, 'yyyy-MM-dd')
-        if(mainMotorCategoryId) {
-        const result = await Database.rawQuery(`
+        if (mainMotorCategoryId) {
+            const result = await Database.rawQuery(`
         SELECT SUM(main_motor_category_id = ${mainMotorCategoryId}) as Count FROM motor_posts 
                 where is_approve =1 and active =1 and update_status_level =3 
                 and subscription_id IN (${subscriptionIds})`)
-        return result[0]
+            return result[0]
         } else {
-        const result = await Database.rawQuery(`
+            const result = await Database.rawQuery(`
         SELECT Count(id) as Count FROM motor_posts 
                 where is_approve =1 and active =1 and update_status_level =3 
                 and subscription_id IN (${subscriptionIds})`)
-        return result[0] 
+            return result[0]
         }
 
     }
@@ -160,7 +160,8 @@ export default class MotorpostRepo {
                 query.where('motor_posts.user_id', userId))
             .if(subscriptionIds, (query) =>
                 query.whereIn('motor_posts.subscription_id', subscriptionIds))
-            .if(offset && limit, (query) => {
+            // Apply pagination only if offset and limit are both defined
+            .if(typeof offset === 'number' && typeof limit === 'number', (query) => {
                 query.forPage(offset, limit)
             })
         return result

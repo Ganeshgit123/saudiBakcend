@@ -65,7 +65,7 @@ export default class MotorpostsController {
         }
 
         let motorPostCount = await MotorpostRepo.getMotorPostCount(subscriptionIds)
-        
+
         return {
             success: true,
             data: motorPostCount,
@@ -105,21 +105,20 @@ export default class MotorpostsController {
 
         if (motorPost.length != 0) {
             motorPost.map(async (el) => {
-                
+
                 if (el.subscriptionId != 0) {
-                let data = SubscriptionListsDomain.createFromArrOfObject(
-                    await SubscriptionListRepo.checkSubscriptionListWithId(el.subscriptionId, 'MOTOR')
-                )
-                
-                if (data.length == 0) {
-                    el.expiry = 1
+                    let data = SubscriptionListsDomain.createFromArrOfObject(
+                        await SubscriptionListRepo.checkSubscriptionListWithId(el.subscriptionId, 'MOTOR')
+                    )
+
+                    if (data.length == 0) {
+                        el.expiry = 1
+                    } else {
+                        el.expiry = 0
+                    }
                 } else {
-                    el.expiry = 0
+                    el.expiry = 1
                 }
-            } else 
-            {
-                el.expiry = 1
-            }
             })
         }
 
@@ -140,7 +139,7 @@ export default class MotorpostsController {
         let orderbyValue: string = payload.orderbyValue ? String(payload.orderbyValue) : 'DESC'
         const offset = payload.offset ? Number(payload.offset) : 1;
         const limit = payload.offset ? Number(payload.limit) : 25;
-        const mainMotorCategoryId = payload.mainMotorCategoryId || ''
+        // const mainMotorCategoryId = payload.mainMotorCategoryId || ''
 
         let data = SubscriptionListsDomain.createFromArrOfObject(
             await SubscriptionListRepo.checkSubscriptionList('', 'MOTOR')
@@ -156,11 +155,14 @@ export default class MotorpostsController {
                 subscriptionIds.push(el.id)
             })
         }
-        
-        let motorPostCount = await MotorpostRepo.getMotorCount(subscriptionIds, mainMotorCategoryId)
+
         let motorPost = MotorPostDomain.createFromArrOfObject(
             await MotorpostRepo.getAllPost(userId, orderbyColumn, orderbyValue, payload, offset, limit, subscriptionIds)
         )
+        let motorPostWithoutPagination = MotorPostDomain.createFromArrOfObject(
+            await MotorpostRepo.getAllPost(userId, orderbyColumn, orderbyValue, payload, undefined, undefined, subscriptionIds)
+        )
+        let motorPostCount = motorPostWithoutPagination.length
 
         // if (motorPost.length != 0) {
         //     motorPost.map(async (el) => {
